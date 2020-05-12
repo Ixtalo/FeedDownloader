@@ -1,0 +1,4 @@
+feedparser
+requests
+docopt
+beautifulsoup4
