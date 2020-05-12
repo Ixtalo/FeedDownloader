@@ -49,7 +49,7 @@ import feedparser   ## https://pythonhosted.org/feedparser/
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "1.0"
+__version__ = "1.1"
 __date__ = "2020-05-12"
 __updated__ = "2020-05-12"
 __author__ = "Ixtalo"
@@ -92,19 +92,31 @@ def main():
 
     assert not os.path.exists(zipfilename), "Output file must not exist!"
 
+    ## HTP GET
+    ## RSS is basically XML
+    r = requests.get(feed_url)
+    if not r:
+        logging.error("No data for URL!")
+        return 7
+
     ## HTTP feed parser
-    feed = feedparser.parse(feed_url)
+    feed = feedparser.parse(r.text)
+    if not feed.entries:
+        logging.error("No feed data!")
+        return 9
+
 
     with zipfile.ZipFile(zipfilename, "a", zipfile.ZIP_DEFLATED) as zf:
         ## extract just the filename of the URL path
         basename = os.path.basename(requests.utils.urlparse(feed_url).path)
-        ## write string as file entry in ZIP
-        zf.writestr(basename, json.dumps(feed))
+        ## write string data as file entry in ZIP
+        zf.writestr("%s.xml" % basename, r.text)
+        #zf.writestr("%s.json" % basename, json.dumps(feed))
 
         ## process linked feed entries
         for i, entry in enumerate(feed.entries):
             try:
-                logging.info("Processing %d/%d: %s", i, len(feed.entries), entry.link)
+                logging.info("Processing %d/%d: %s", i+1, len(feed.entries), entry.link)
                 ## HTTP GET
                 r = requests.get(entry.link)
                 ## extract just the filename of the URL path
@@ -124,6 +136,7 @@ def main():
                     logging.warning("No result for %s", entry.link)
             except Exception as ex:
                 logging.exception(ex)
+            break
 
     return 0
 
