@@ -136,7 +136,6 @@ def main():
                     logging.warning("No result for %s", entry.link)
             except Exception as ex:
                 logging.exception(ex)
-            break
 
     return 0
 
