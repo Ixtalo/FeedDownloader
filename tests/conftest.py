@@ -8,7 +8,7 @@ https://docs.pytest.org/en/7.1.x/how-to/writing_plugins.html#localplugin
 
 
 def pytest_runtest_setup(item):
-    """Called to perform the setup phase for a test item.
+    """Perform the setup phase for a test item. Called by pytest.
 
     https://docs.pytest.org/en/7.1.x/reference/reference.html#pytest.hookspec.pytest_runtest_setup
 
@@ -18,5 +18,5 @@ def pytest_runtest_setup(item):
     (which haven’t been obtained yet).
     """
     import os
-    if not os.path.realpath(os.curdir).endswith("/test"):
-        os.chdir("test")
+    if not os.path.realpath(os.curdir).endswith("/tests"):
+        os.chdir("tests")

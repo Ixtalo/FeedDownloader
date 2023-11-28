@@ -20,24 +20,24 @@ Options:
   -v --verbose      Be more verbose.
   --version         Show version.
 """
-##
+#
 # LICENSE:
-##
+#
 # Copyright (C) 2020-2022 Ixtalo, ixtalo@gmail.com
-##
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-##
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-##
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
+#
 import os
 import sys
 import time
@@ -83,7 +83,8 @@ def __setup_logging(log_file: str = None, verbose=False, no_color=False):
     handler = colorlog.StreamHandler(stream=stream)
 
     format_string = "%(log_color)s%(asctime)s %(levelname)-8s %(message)s"
-    formatter = colorlog.ColoredFormatter(format_string, datefmt="%Y-%m-%d %H:%M:%S", no_color=no_color)
+    formatter = colorlog.ColoredFormatter(
+        format_string, datefmt="%Y-%m-%d %H:%M:%S", no_color=no_color)
     handler.setFormatter(formatter)
 
     logging.basicConfig(level=logging.WARNING, handlers=[handler])
@@ -143,7 +144,8 @@ def run(feed_url: str, output_dir: Path):
         # process linked feed entries
         for i, entry in enumerate(feed.entries):
             try:
-                logging.info("Processing %d/%d: %s", i + 1, len(feed.entries), entry.link)
+                logging.info("Processing %d/%d: %s", i + 1,
+                             len(feed.entries), entry.link)
                 response = __http_get(entry.link)
                 if response:
                     # extract only the feed story
@@ -154,7 +156,8 @@ def run(feed_url: str, output_dir: Path):
                         entry_basename = __get_url_just_filename(entry.link)
                         zf.writestr("%s.html" % entry_basename, article)
                     else:
-                        logging.warning("No element article.story for %s", entry.link)
+                        logging.warning(
+                            "No element article.story for %s", entry.link)
                 else:
                     logging.warning("No result for %s", entry.link)
             except Exception as ex:

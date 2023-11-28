@@ -5,7 +5,7 @@
 # pylint: disable=missing-function-docstring, line-too-long, invalid-name
 
 import pytest
-from downloader import __get_url_just_filename
+from feeddownloader.downloader import __get_url_just_filename
 
 
 def test_get_url_just_filename():
