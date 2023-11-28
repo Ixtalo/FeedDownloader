@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 """downloader.py - Feed (e.g. RSS) downloader.
 
-Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper.
+Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper,
+and store the collected RSS articles into ZIP files.
+
+Only the RSS `<article>` parts are stored.
 
 Usage:
   downloader.py [options] <url> <output-folder>
@@ -17,13 +20,13 @@ Options:
   -h --help         Show this screen.
   --logfile=FILE    Logging to FILE, otherwise use STDOUT.
   --no-color        No colored log output.
-  -v --verbose      Be more verbose.
+  -n --limit=N      Limit linked feed entries to the first N articles.
   --version         Show version.
 """
 #
 # LICENSE:
 #
-# Copyright (C) 2020-2022 Ixtalo, ixtalo@gmail.com
+# Copyright (C) 2020-2023 Ixtalo, ixtalo@gmail.com
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -46,27 +49,25 @@ import os.path
 import logging
 from pathlib import Path
 from urllib.parse import urlparse
-import feedparser   # https://pythonhosted.org/feedparser/
+import feedparser  # https://pythonhosted.org/feedparser/
 import requests
 import colorlog
 import validators
 from docopt import docopt
 from bs4 import BeautifulSoup
 
-__version__ = "1.3.1"
+__version__ = "1.5.0"
 __date__ = "2020-05-12"
-__updated__ = "2022-10-07"
+__updated__ = "2023-11-28"
 __author__ = "Ixtalo"
 __license__ = "AGPL-3.0+"
 __email__ = "ixtalo@gmail.com"
 __status__ = "Production"
 
-
 HTTP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/105.0"
 LOGGING_STREAM = sys.stdout
 DEBUG = bool(os.environ.get("DEBUG", "").lower() in ("1", "true", "yes"))
 __script_dir = Path(__file__).parent
-
 
 # check for Python3
 if sys.version_info < (3, 0):
@@ -74,8 +75,9 @@ if sys.version_info < (3, 0):
     sys.exit(1)
 
 
-def __setup_logging(log_file: str = None, verbose=False, no_color=False):
+def __setup_logging(log_file: str = None, no_color=False):
     if log_file:
+        # pylint: disable=consider-using-with
         stream = open(log_file, "a", encoding="utf8")
         no_color = True
     else:
@@ -87,9 +89,7 @@ def __setup_logging(log_file: str = None, verbose=False, no_color=False):
         format_string, datefmt="%Y-%m-%d %H:%M:%S", no_color=no_color)
     handler.setFormatter(formatter)
 
-    logging.basicConfig(level=logging.WARNING, handlers=[handler])
-    if verbose or log_file:
-        logging.getLogger("").setLevel(logging.INFO)
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
     if DEBUG:
         logging.getLogger("").setLevel(logging.DEBUG)
 
@@ -103,22 +103,23 @@ def __http_get(url):
     return response
 
 
-def __get_url_just_filename(url: str):
+def __get_just_filename_from_url(url: str):
     """Extract just the filename of a URL, e.g., 'index.html'."""
     assert url is not None
     return os.path.basename(urlparse(url).path)
 
 
-def run(feed_url: str, output_dir: Path):
+def run(feed_url: str, output_dir: Path, limit: int | None = -1):
     """Run the main job.
 
     :param feed_url: URL string
     :param output_dir: target output directory
+    :param limit: limit the number of linked feed entries
     :return: result code
     """
     assert isinstance(output_dir, Path)
     assert output_dir.exists() and output_dir.is_dir()
-    assert validators.url(feed_url), "Invalid URL!"
+    assert validators.url(feed_url), f"Invalid URL: '{feed_url}'"
 
     # construct output filename, e.g. '2020-05-12_125241.zip'
     now = time.strftime("%Y-%m-%d_%H%M%S")
@@ -138,28 +139,30 @@ def run(feed_url: str, output_dir: Path):
     assert feed and feed.entries, "No feed data!"
 
     with zipfile.ZipFile(zip_filepath, "a", zipfile.ZIP_DEFLATED) as zf:
-        basename = __get_url_just_filename(feed_url)
+        basename = __get_just_filename_from_url(feed_url)
+
+        # main XML feed overview
         zf.writestr(f"{basename}.xml", response.text)
 
         # process linked feed entries
         for i, entry in enumerate(feed.entries):
+            if limit is not None and i >= limit:
+                break
             try:
                 logging.info("Processing %d/%d: %s", i + 1,
                              len(feed.entries), entry.link)
                 response = __http_get(entry.link)
                 if response:
+                    entry_basename = __get_just_filename_from_url(entry.link)
                     # extract only the feed story
                     soup = BeautifulSoup(response.text, 'lxml')
-                    story = soup.select('article.story')
-                    if story:
-                        article = str(story[0])
-                        entry_basename = __get_url_just_filename(entry.link)
-                        zf.writestr("%s.html" % entry_basename, article)
-                    else:
-                        logging.warning(
-                            "No element article.story for %s", entry.link)
+                    article = soup.select("article")
+                    if not article:
+                        logging.error("No <article> element for '%s'! Skipping.", entry_basename)
+                        continue
+                    zf.writestr(f"{entry_basename}.html", str(article[0]))
                 else:
-                    logging.warning("No result for %s", entry.link)
+                    logging.warning("No result for '%s'", entry.link)
             except Exception as ex:
                 logging.exception(ex)
 
@@ -177,9 +180,9 @@ def main():
     arg_output_dir = arguments['<output-folder>']
     arg_logfile = arguments["--logfile"]
     arg_nocolor = arguments["--no-color"]
-    arg_verbose = arguments["--verbose"]
+    arg_limit = int(arguments["--limit"]) if arguments["--limit"] else None
 
-    __setup_logging(arg_logfile, arg_verbose, arg_nocolor)
+    __setup_logging(arg_logfile, arg_nocolor)
     logging.info(version_string)
 
     output_dir = Path(arg_output_dir)
@@ -191,13 +194,10 @@ def main():
             raise NotADirectoryError("Output directory does not exist!")
     logging.info("output_dir: %s", output_dir.resolve())
 
-    return run(arg_feed_url, output_dir)
+    return run(arg_feed_url, output_dir, arg_limit)
 
 
 if __name__ == '__main__':
-    if DEBUG:
-        # sys.argv.append('--verbose')
-        pass
     if os.environ.get("PROFILE", "").lower() in ("true", "1", "yes"):
         import cProfile
         import pstats

@@ -1,6 +1,9 @@
 # (RSS) Feed Downloader
 
-Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper.
+Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper,
+and store the collected RSS articles into ZIP files.
+
+Only the RSS `<article>` parts are stored.
 
 ## Requirements
 
@@ -11,3 +14,7 @@ Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper.
 
 1. `poetry install --only=main` (once)
 2. `poetry run python feeddownloader/downloader.py <RSS-URL> <OUTPUT-FOLDER>`
+
+
+Example:
+`poetry run python feeddownloader/downloader.py "https://www.tagesschau.de/index~rss2.xml" output/`
