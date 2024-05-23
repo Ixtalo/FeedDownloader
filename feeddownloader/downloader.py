@@ -26,7 +26,7 @@ Options:
 #
 # LICENSE:
 #
-# Copyright (C) 2020-2023 Ixtalo, ixtalo@gmail.com
+# Copyright (C) 2020-2024 Ixtalo, ixtalo@gmail.com
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -56,9 +56,9 @@ import validators
 from docopt import docopt
 from bs4 import BeautifulSoup
 
-__version__ = "1.5.0"
+__version__ = "1.5.5"
 __date__ = "2020-05-12"
-__updated__ = "2023-11-28"
+__updated__ = "2024-04-15"
 __author__ = "Ixtalo"
 __license__ = "AGPL-3.0+"
 __email__ = "ixtalo@gmail.com"
@@ -67,7 +67,7 @@ __status__ = "Production"
 HTTP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/105.0"
 LOGGING_STREAM = sys.stdout
 DEBUG = bool(os.environ.get("DEBUG", "").lower() in ("1", "true", "yes"))
-__script_dir = Path(__file__).parent
+__script_dir = Path(__file__).parent.parent     # project folder
 
 # check for Python3
 if sys.version_info < (3, 0):
@@ -191,7 +191,7 @@ def main():
         output_dir = __script_dir.joinpath(output_dir)
         if not output_dir.exists():
             # still no valid output directory...
-            raise NotADirectoryError("Output directory does not exist!")
+            raise NotADirectoryError(f"Output directory '{output_dir.resolve()}' does not exist!")
     logging.info("output_dir: %s", output_dir.resolve())
 
     return run(arg_feed_url, output_dir, arg_limit)

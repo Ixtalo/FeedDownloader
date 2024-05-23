@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "feeddownloader"
-version = "1.5.0"
+version = "1.5.2"
 description = "Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper."
 authors = ["Ixtalo <ixtalo@users.noreply.github.com>"]
 license = "AGPL"
@@ -8,13 +8,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-feedparser = "^6.0.10"
-requests = "^2.32.0"
-docopt = "^0.6.2"
-beautifulsoup4 = "^4.12.2"
-lxml = "^4.9.3"
-colorlog = "^6.7.0"
-validators = "^0.22.0"
+feedparser = "*"
+requests = "*"
+docopt = "*"
+beautifulsoup4 = "*"
+lxml = "*"
+colorlog = "*"
+validators = "*"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -55,3 +55,11 @@ testpaths = ["tests",]
 ## https://coverage.readthedocs.io/en/latest/source.html#source
 [tool.coverage.run]
 omit = ["tests/*", "__init__.py"]
+
+## https://github.com/hhatto/autopep8?tab=readme-ov-file#configuration
+[tool.autopep8]
+max_line_length = 120
+ignore = "E501,W6"  # or ["E501", "W6"]
+in-place = true
+recursive = true
+aggressive = 3

@@ -8,11 +8,11 @@ Only the RSS `<article>` parts are stored.
 ## Requirements
 
 * Python 3.10+
-* Poetry (install with `python3 -m pip install -U --user poetry`)
+* Poetry (see https://python-poetry.org/docs/#installation)
 
 ## Usage
 
-1. `poetry install --only=main` (once)
+1. set up: `poetry install --only=main --sync` (once)
 2. `poetry run python feeddownloader/downloader.py <RSS-URL> <OUTPUT-FOLDER>`
 
 
