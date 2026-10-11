@@ -1,7 +1,7 @@
 .venv/
 htmlcov/
 output/
-
+repomix*.xml
 
 
 # Created by https://www.gitignore.io/api/python,pycharm
@@ -201,3 +201,7 @@ dmypy.json
 .pyre/
 
 # End of https://www.gitignore.io/api/python,pycharm
+
+.ipynb_checkpoints/
+.ruff_cache/
+.idea/
