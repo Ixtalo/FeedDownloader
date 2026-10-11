@@ -5,49 +5,28 @@ exclude: ^tests/testdata/
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      - id: check-yaml
       - id: check-added-large-files
       - id: check-ast
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: check-yaml
       - id: detect-private-key
-      - id: fix-encoding-pragma
-  - repo: https://github.com/hhatto/autopep8
-    rev: 'v2.0.4'  # Use the sha / tag you want to point at
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
     hooks:
-      - id: autopep8
-  - repo: https://github.com/myint/autoflake
-    rev: v2.2.1
-    hooks:
-      - id: autoflake
-        exclude: &fixtures tests/functional/|tests/input|doc/data/messages|tests(/\w*)*data/
-        args:
-          - --in-place
-          - --remove-all-unused-imports
-          - --expand-star-imports
-          - --remove-duplicate-keys
-          - --remove-unused-variables
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        exclude: *fixtures
-        additional_dependencies: [Flake8-pyproject]
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
   - repo: local
     hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
+      - id: mypy
+        name: mypy
+        entry: mypy
         language: system
         types: [python]
-        args: ["--fail-under=9", "--ignore-paths=attic"]
-  - repo: https://github.com/PyCQA/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        additional_dependencies: [tomli]
+        args: ["."]
+        pass_filenames: false

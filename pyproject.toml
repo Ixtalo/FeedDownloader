@@ -1,65 +1,67 @@
-[tool.poetry]
+[project]
 name = "feeddownloader"
-version = "1.5.2"
 description = "Download feeds (e.g. RSS) and all linked pages, like a crawler/scraper."
-authors = ["Ixtalo <ixtalo@users.noreply.github.com>"]
-license = "AGPL"
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-feedparser = "*"
-requests = "*"
-docopt = "*"
-beautifulsoup4 = "*"
-lxml = "*"
-colorlog = "*"
-validators = "*"
-
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "*"
-pylint = "*"
-pytest = "*"
-pytest-sugar = "*"
-pytest-cov = "*"
-pytest-clarity = "*"
-pytest-icdiff = "*"
-flake8-pyproject = "^1.2.3"
-pydocstyle = "^6.3.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-## https://flake8.pycqa.org/en/latest/user/configuration.html
-## https://github.com/john-hen/Flake8-pyproject
-[tool.flake8]
-ignore = ["E501"]
-per-file-ignores = [
-    '__init__.py:F401',
+dynamic = [
+    "license",
 ]
-max-line-length = 120
-count = true
+version = "1.7.0"
+readme = "README.md"
+authors = [
+    {name = "Ixtalo", email = "ixtalo@users.noreply.github.com"},
+]
+requires-python = '>=3.12,<4.0'
+dependencies = [
+    'feedparser',
+    'httpx',
+    'fake-useragent',
+    'beautifulsoup4',
+    'lxml',
+    'loguru',
+    'typer',
+    'validators',
+]
 
-## http://www.pydocstyle.org/en/stable/usage.html#configuration-files
-[tool.pydocstyle]
-#match_dir='^[^\.t].+$'
-#match_dir = '[^/].+'
+[dependency-groups]
+dev = [
+    'pre-commit',
+    'pytest',
+    'pytest-cov',
+    'mypy',
+    "ruff (>=0.17.0,<0.18.0)",
+]
 
-## https://docs.pytest.org/en/7.1.x/reference/customize.html#pyproject-toml
+[tool.poetry]
+license = "AGPL-3.0-only"
+package-mode = false
+requires-poetry = '>=2.2.1'
+
+
 [tool.pytest.ini_options]
-minversion = "6.0"
-testpaths = ["tests",]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "--cov=downloader --cov-report=term-missing "
 
-## https://coverage.readthedocs.io/en/latest/source.html#source
-[tool.coverage.run]
-omit = ["tests/*", "__init__.py"]
 
-## https://github.com/hhatto/autopep8?tab=readme-ov-file#configuration
-[tool.autopep8]
-max_line_length = 120
-ignore = "E501,W6"  # or ["E501", "W6"]
-in-place = true
-recursive = true
-aggressive = 3
+## https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+extend-exclude = ["testing"]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "D", "S", "BLE", "PTH", "RUF", "PT", "TRY"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D", "S101"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true

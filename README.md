@@ -7,14 +7,14 @@ Only the RSS `<article>` parts are stored.
 
 ## Requirements
 
-* Python 3.10+
+* Python 3.12+
 * Poetry (see https://python-poetry.org/docs/#installation)
 
 ## Usage
 
 1. set up: `poetry install --only=main --sync` (once)
-2. `poetry run python feeddownloader/downloader.py <RSS-URL> <OUTPUT-FOLDER>`
+2. `poetry run python downloader.py <RSS-URL> <OUTPUT-FOLDER>`
 
 
 Example:
-`poetry run python feeddownloader/downloader.py "https://www.tagesschau.de/index~rss2.xml" output/`
+`poetry run python downloader.py "https://www.tagesschau.de/index~rss2.xml" output/`
